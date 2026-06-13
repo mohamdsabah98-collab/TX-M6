@@ -1,0 +1,201 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========== USER MODEL ==========
+model User {
+  id                String     @id @default(cuid())
+  email             String     @unique
+  password          String?
+  googleId          String?    @unique
+  firstName         String
+  lastName          String
+  profilePicture    String?
+  role              UserRole   @default(USER)
+  subscriptionTier  String     @default("FREE")
+  storageUsed       BigInt     @default(0)
+  isSuspended       Boolean    @default(false)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Relations
+  files             File[]
+  folders           Folder[]
+  shares            Share[]
+  downloads         Download[]
+  advertisements    Advertisement[]
+
+  @@index([email])
+  @@index([googleId])
+  @@index([role])
+}
+
+// ========== FILE MODEL ==========
+model File {
+  id                String     @id @default(cuid())
+  fileName          String
+  fileType          String
+  fileSize          BigInt
+  storagePath       String
+  virusScanStatus   String     @default("PENDING")
+  downloadCount     Int        @default(0)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Foreign Keys
+  userId            String
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderId          String?
+  folder            Folder?    @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  // Relations
+  shares            Share[]
+  downloads         Download[]
+  tags              Tag[]
+
+  @@index([userId])
+  @@index([folderId])
+  @@index([createdAt])
+}
+
+// ========== FOLDER MODEL ==========
+model Folder {
+  id                String     @id @default(cuid())
+  name              String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Foreign Keys
+  userId            String
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentFolderId    String?
+  parent            Folder?    @relation("FolderHierarchy", fields: [parentFolderId], references: [id], onDelete: SetNull)
+
+  // Relations
+  files             File[]
+  children          Folder[]   @relation("FolderHierarchy")
+
+  @@index([userId])
+  @@index([parentFolderId])
+}
+
+// ========== SHARE MODEL ==========
+model Share {
+  id                String     @id @default(cuid())
+  isPublic          Boolean    @default(false)
+  password          String?
+  expiresAt         DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Foreign Keys
+  fileId            String
+  file              File       @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  userId            String?
+  user              User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Relations
+  downloads         Download[]
+  analytics         Analytics[]
+
+  @@index([fileId])
+  @@index([userId])
+  @@index([isPublic])
+}
+
+// ========== DOWNLOAD MODEL ==========
+model Download {
+  id                String     @id @default(cuid())
+  downloadCount     Int        @default(0)
+  lastDownloadedAt  DateTime   @updatedAt
+  createdAt         DateTime   @default(now())
+
+  // Foreign Keys
+  shareId           String     @unique
+  share             Share      @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  fileId            String?
+  file              File?      @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@index([shareId])
+  @@index([fileId])
+}
+
+// ========== TAG MODEL ==========
+model Tag {
+  id                String     @id @default(cuid())
+  name              String     @unique
+  color             String     @default("#3B82F6")
+  createdAt         DateTime   @default(now())
+
+  // Relations
+  files             File[]
+
+  @@index([name])
+}
+
+// ========== ANALYTICS MODEL ==========
+model Analytics {
+  id                String     @id @default(cuid())
+  uniqueDownloads   Int        @default(0)
+  totalBandwidth    BigInt     @default(0)
+  referrerSource    String?
+  ipAddress         String?
+  userAgent         String?
+  createdAt         DateTime   @default(now())
+
+  // Foreign Keys
+  shareId           String
+  share             Share      @relation(fields: [shareId], references: [id], onDelete: Cascade)
+
+  @@index([shareId])
+  @@index([createdAt])
+}
+
+// ========== ADVERTISEMENT MODEL ==========
+model Advertisement {
+  id                String     @id @default(cuid())
+  title             String
+  description       String?
+  imageUrl          String?
+  redirectUrl       String
+  isActive          Boolean    @default(true)
+  viewCount         Int        @default(0)
+  clickCount        Int        @default(0)
+  startDate         DateTime
+  endDate           DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Foreign Keys
+  userId            String
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isActive])
+  @@index([userId])
+}
+
+// ========== SUBSCRIPTION MODEL ==========
+model Subscription {
+  id                String     @id @default(cuid())
+  tier              String     @unique
+  storage           BigInt
+  price             Float
+  features          String[]
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+// ========== ENUMS ==========
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
