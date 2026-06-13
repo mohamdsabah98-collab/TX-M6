@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tx-m6-postgres-dev
+    environment:
+      POSTGRES_USER: tx_m6_user
+      POSTGRES_PASSWORD: tx_m6_password
+      POSTGRES_DB: tx_m6
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - tx-m6-dev-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: tx-m6-redis-dev
+    ports:
+      - "6379:6379"
+    networks:
+      - tx-m6-dev-network
+
+volumes:
+  postgres_dev_data:
+
+networks:
+  tx-m6-dev-network:
+    driver: bridge
