@@ -1,0 +1,11 @@
+next.config.js
+.env.local
+.env.*.local
+*.pem
+node_modules/
+.next/
+out/
+build/
+dist/
+.turbo/
+.vercel/

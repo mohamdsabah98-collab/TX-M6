@@ -1,0 +1,11 @@
+dist/
+build/
+node_modules/
+.env
+.env.local
+.env.*.local
+*.log
+prisma/dev.db
+prisma/*.db
+uploads/
+.turbo/
