@@ -1,0 +1,45 @@
+{
+  "name": "tx-m6",
+  "version": "1.0.0",
+  "description": "TX-M6 - Modern File Hosting and Sharing Platform",
+  "keywords": [
+    "file-hosting",
+    "file-sharing",
+    "cloud-storage",
+    "cloudflare",
+    "s3",
+    "next.js",
+    "express",
+    "react"
+  ],
+  "author": "TX-M6 Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mohamdsabah98-collab/TX-M6.git"
+  },
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm run test",
+    "test:frontend": "cd frontend && npm run test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
